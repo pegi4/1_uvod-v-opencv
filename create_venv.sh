@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 
 #Ta skripta ustvari virtualno okolje in namesti paket pip
@@ -20,9 +20,3 @@ pip install -r requirements.txt
 
 #Pobriši virtualno okolje
 # rm -rf $VENV
-
-
-
-
-
-
