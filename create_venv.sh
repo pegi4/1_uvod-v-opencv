@@ -9,7 +9,7 @@ VENV=".venv"
 python3 -m venv $VENV
 
 #Aktiviraj virtualno okolje
-source $(pwd)/$VENV/bin/activate
+source $(pwd)/$VENV/bin/activate.fish
 
 #Namesti paket pip  
 pip install --upgrade pip
