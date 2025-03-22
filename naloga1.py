@@ -25,9 +25,44 @@ def doloci_barvo_koze(slika,levo_zgoraj,desno_spodaj) -> tuple:
     pass
 
 if __name__ == '__main__':
-    #Pripravi kamero
 
-    #Zajami prvo sliko iz kamere
+    camera = cv.VideoCapture(1)
+
+    if not camera.isOpened():
+        print('Camera does not work.')
+        exit()
+
+    while True:
+        # Read the image from the camera
+        ret, image = camera.read()
+        
+        if not ret:
+            print('Error reading from camera.')
+            camera.release()
+            exit()
+
+        image = cv.flip(image, 1)
+        cv.imshow('Camera', image)
+
+        key = cv.waitKey(1) & 0xFF
+        if key == ord('c'):
+            roi = cv.selectROI("Select the fild", image, fromCenter=False, showCrosshair=True)
+            cv.destroyWindow("Select the fild")
+            # Cordinates from roi: (x, y, width, height)
+            x, y, w, h = roi
+            upper_left = (x, y)
+            down_right = (x + w, y + h)
+            print(f"Top left corner: {upper_left}")
+            print(f"Lower right corner: {down_right}")
+        elif key == ord('q'):
+            camera.realise()
+            cv.destroyAllWindows()
+            exit(0)
+            break
+
+    # Zapremo okno
+    camera.release()
+    cv.destroyAllWindows()
 
     #Izračunamo barvo kože na prvi sliki
 
