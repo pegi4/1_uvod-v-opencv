@@ -16,10 +16,10 @@ def determine_skin_color(image, top_left, bottom_right) -> tuple:
     print(f"Mean: {mean}")
     std = np.std(fild, axis=(0, 1))
     print(f"Std: {std}")
-    k = 1.0
+    k = 0.5
 
-    lower_bound = np.clip(mean - k * std, 0, 255)
-    upper_bound = np.clip(mean + k * std, 0, 255)
+    lower_bound = np.clip(mean - k * std, 0, 255).reshape(1, 3)
+    upper_bound = np.clip(mean + k * std, 0, 255).reshape(1, 3)
 
     print(f"Lower bound: {lower_bound}")
     print(f"Upper bound: {upper_bound}")
@@ -41,13 +41,27 @@ def process_image_with_boxes(image, box_width, box_height, skin_color) -> list:
     h, w = image.shape[:2]
     num_boxes_y = h // box_height
     num_boxes_x = w // box_width
-    total_boxes = num_boxes_y * num_boxes_x
-    random_counts = np.random.randint(0, 55, size=(total_boxes,))
-    return random_counts.reshape(num_boxes_y, num_boxes_x).tolist()
+    
+    # Ustvari matriko koordinat za zgornje leve kote škatel
+    y_coords = np.arange(0, num_boxes_y * box_height, box_height)
+    x_coords = np.arange(0, num_boxes_x * box_width, box_width)
+    coords = np.array(np.meshgrid(x_coords, y_coords)).T.reshape(-1, 2)  # Koordinate [x, y]
+    
+    # Preštej piksle za vsako škatlo
+    counts = []
+    for x, y in coords:
+        podslika = image[y:y + box_height, x:x + box_width]
+        st_pikslov = count_skin_colored_pixels(podslika, skin_color)
+        counts.append(st_pikslov)
+    
+    # Preoblikuj v matriko
+    return np.array(counts).reshape(num_boxes_y, num_boxes_x).tolist()
 
 def count_skin_colored_pixels(image, skin_color) -> int:
     '''Count the number of skin-colored pixels in the box.'''
-    pass
+    lower_bound, upper_bound = skin_color
+    mask = cv.inRange(image, lower_bound, upper_bound)
+    return cv.countNonZero(mask)
 
 if __name__ == '__main__':
 
@@ -80,7 +94,7 @@ if __name__ == '__main__':
             # Prikaz škatel na zmanjšani sliki
             for y, vrstica in enumerate(boxes):
                 for x, st_pikslov in enumerate(vrstica):
-                    if st_pikslov > 50:  # Prag za "kožo"
+                    if st_pikslov > 200:  # Prag za "kožo"
                         x1 = x * box_width
                         y1 = y * box_height
                         x2 = x1 + box_width
