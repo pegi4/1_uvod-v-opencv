@@ -3,7 +3,7 @@ import numpy as np
 
 def resize_image(image, width, height):
     '''Resize the image to the specified width x height.'''
-    pass
+    return cv.resize(image, (width, height), interpolation=cv.INTER_AREA)
 
 def process_image_with_boxes(image, box_width, box_height, skin_color) -> list:
     '''Iterate through the image in box-sized sections (box_width x box_height) and calculate the number of skin-colored pixels in each box.
