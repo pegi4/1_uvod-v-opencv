@@ -3,7 +3,7 @@ import numpy as np
 
 def resize_image(image, width, height):
     '''Resize the image to the specified width x height.'''
-    pass
+    return cv.resize(image, (width, height), interpolation=cv.INTER_AREA)
 
 def process_image_with_boxes(image, box_width, box_height, skin_color) -> list:
     '''Iterate through the image in box-sized sections (box_width x box_height) and calculate the number of skin-colored pixels in each box.
@@ -43,8 +43,6 @@ def determine_skin_color(image, top_left, bottom_right) -> tuple:
 
     return (lower_bound, upper_bound)
 
-    pass
-
 if __name__ == '__main__':
 
     camera = cv.VideoCapture(1)
@@ -53,6 +51,7 @@ if __name__ == '__main__':
         exit()
 
     skin_color = None
+    target_width, target_height = 220, 340
 
     while True:
         # Read the image from the camera
@@ -64,7 +63,13 @@ if __name__ == '__main__':
             exit()
 
         image = cv.flip(image, 1)
-        cv.imshow('Camera', image)
+
+        if skin_color is None:
+            cv.imshow('Camera', image)
+        else:
+            resized_image = resize_image(image, target_width, target_height)
+
+            cv.imshow('Camera', resized_image)
 
         key = cv.waitKey(1) & 0xFF
         if key == ord('c'):
@@ -85,11 +90,8 @@ if __name__ == '__main__':
             exit(0)
             break
 
-    # Zapremo okno
     camera.release()
     cv.destroyAllWindows()
-
-    #Izračunamo barvo kože na prvi sliki
 
     #Zajemaj slike iz kamere in jih obdeluj     
     
