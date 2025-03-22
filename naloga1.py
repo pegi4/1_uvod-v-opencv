@@ -43,8 +43,6 @@ def determine_skin_color(image, top_left, bottom_right) -> tuple:
 
     return (lower_bound, upper_bound)
 
-    pass
-
 if __name__ == '__main__':
 
     camera = cv.VideoCapture(1)
@@ -53,6 +51,7 @@ if __name__ == '__main__':
         exit()
 
     skin_color = None
+    target_width, target_height = 220, 340
 
     while True:
         # Read the image from the camera
@@ -64,7 +63,13 @@ if __name__ == '__main__':
             exit()
 
         image = cv.flip(image, 1)
-        cv.imshow('Camera', image)
+
+        if skin_color is None:
+            cv.imshow('Camera', image)
+        else:
+            resized_image = resize_image(image, target_width, target_height)
+
+            cv.imshow('Camera', resized_image)
 
         key = cv.waitKey(1) & 0xFF
         if key == ord('c'):
@@ -85,11 +90,8 @@ if __name__ == '__main__':
             exit(0)
             break
 
-    # Zapremo okno
     camera.release()
     cv.destroyAllWindows()
-
-    #Izračunamo barvo kože na prvi sliki
 
     #Zajemaj slike iz kamere in jih obdeluj     
     
