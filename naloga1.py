@@ -25,17 +25,34 @@ def determine_skin_color(image, top_left, bottom_right) -> tuple:
 
     print("Selecting color...")
 
-    
+    x1, y1 = top_left
+    x2, y2 = bottom_right
+
+    fild = image[y1:y2, x1:x2]
+    mean = np.mean(fild, axis=(0, 1))
+    print(f"Mean: {mean}")
+    std = np.std(fild, axis=(0, 1))
+    print(f"Std: {std}")
+    k = 1.0
+
+    lower_bound = np.clip(mean - k * std, 0, 255)
+    upper_bound = np.clip(mean + k * std, 0, 255)
+
+    print(f"Lower bound: {lower_bound}")
+    print(f"Upper bound: {upper_bound}")
+
+    return (lower_bound, upper_bound)
 
     pass
 
 if __name__ == '__main__':
 
     camera = cv.VideoCapture(1)
-
     if not camera.isOpened():
         print('Camera does not work.')
         exit()
+
+    skin_color = None
 
     while True:
         # Read the image from the camera
@@ -60,6 +77,7 @@ if __name__ == '__main__':
             print(f"Top left corner: {upper_left}")
             print(f"Lower right corner: {down_right}")
             skin_color = determine_skin_color(image, upper_left, down_right)
+            print(f"Skin color {skin_color}")
         elif key == ord('q'):
             camera.release()
             cv.destroyAllWindows()
