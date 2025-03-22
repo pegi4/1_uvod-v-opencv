@@ -1,27 +1,32 @@
 import cv2 as cv
 import numpy as np
 
-def zmanjsaj_sliko(slika, sirina, visina):
-    '''Zmanjšaj sliko na velikost sirina x visina.'''
+def resize_image(image, width, height):
+    '''Resize the image to the specified width x height.'''
     pass
 
-def obdelaj_sliko_s_skatlami(slika, sirina_skatle, visina_skatle, barva_koze) -> list:
-    '''Sprehodi se skozi sliko v velikosti škatle (sirina_skatle x visina_skatle) in izračunaj število pikslov kože v vsaki škatli.
-    Škatle se ne smejo prekrivati!
-    Vrne seznam škatel, s številom pikslov kože.
-    Primer: Če je v sliki 25 škatel, kjer je v vsaki vrstici 5 škatel, naj bo seznam oblike
-      [[1,0,0,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]]. 
-      V tem primeru je v prvi škatli 1 piksel kože, v drugi 0, v tretji 0, v četrti 1 in v peti 1.'''
+def process_image_with_boxes(image, box_width, box_height, skin_color) -> list:
+    '''Iterate through the image in box-sized sections (box_width x box_height) and calculate the number of skin-colored pixels in each box.
+    Boxes must not overlap!
+    Returns a list of boxes, each containing the count of skin-colored pixels.
+    Example: If the image has 25 boxes with 5 boxes per row, the list should be structured as
+      [[1,0,0,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]].
+      Here, the first box has 1 skin pixel, the second 0, the third 0, the fourth 1, and the fifth 1.'''
     pass
 
-def prestej_piklse_z_barvo_koze(slika, barva_koze) -> int:
-    '''Prestej število pikslov z barvo kože v škatli.'''
+def count_skin_colored_pixels(image, skin_color) -> int:
+    '''Count the number of skin-colored pixels in the box.'''
     pass
 
-def doloci_barvo_koze(slika,levo_zgoraj,desno_spodaj) -> tuple:
-    '''Ta funkcija se kliče zgolj 1x na prvi sliki iz kamere. 
-    Vrne barvo kože v območju ki ga definira oklepajoča škatla (levo_zgoraj, desno_spodaj).
-      Način izračuna je prepuščen vaši domišljiji.'''
+def determine_skin_color(image, top_left, bottom_right) -> tuple:
+    '''This function is called only once on the first image from the camera.
+    Returns the skin color in the region defined by the bounding box (top_left, bottom_right).
+    The calculation method is left to your imagination.'''
+
+    print("Selecting color...")
+
+    
+
     pass
 
 if __name__ == '__main__':
@@ -54,9 +59,11 @@ if __name__ == '__main__':
             down_right = (x + w, y + h)
             print(f"Top left corner: {upper_left}")
             print(f"Lower right corner: {down_right}")
+            skin_color = determine_skin_color(image, upper_left, down_right)
         elif key == ord('q'):
-            camera.realise()
+            camera.release()
             cv.destroyAllWindows()
+            print('Camera closed.')
             exit(0)
             break
 
