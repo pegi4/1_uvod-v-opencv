@@ -1,23 +1,6 @@
 import cv2 as cv
 import numpy as np
 
-def resize_image(image, width, height):
-    '''Resize the image to the specified width x height.'''
-    return cv.resize(image, (width, height), interpolation=cv.INTER_AREA)
-
-def process_image_with_boxes(image, box_width, box_height, skin_color) -> list:
-    '''Iterate through the image in box-sized sections (box_width x box_height) and calculate the number of skin-colored pixels in each box.
-    Boxes must not overlap!
-    Returns a list of boxes, each containing the count of skin-colored pixels.
-    Example: If the image has 25 boxes with 5 boxes per row, the list should be structured as
-      [[1,0,0,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]].
-      Here, the first box has 1 skin pixel, the second 0, the third 0, the fourth 1, and the fifth 1.'''
-    pass
-
-def count_skin_colored_pixels(image, skin_color) -> int:
-    '''Count the number of skin-colored pixels in the box.'''
-    pass
-
 def determine_skin_color(image, top_left, bottom_right) -> tuple:
     '''This function is called only once on the first image from the camera.
     Returns the skin color in the region defined by the bounding box (top_left, bottom_right).
@@ -43,6 +26,29 @@ def determine_skin_color(image, top_left, bottom_right) -> tuple:
 
     return (lower_bound, upper_bound)
 
+def resize_image(image, width, height):
+    '''Resize the image to the specified width x height.'''
+    return cv.resize(image, (width, height), interpolation=cv.INTER_AREA)
+
+def process_image_with_boxes(image, box_width, box_height, skin_color) -> list:
+    '''Iterate through the image in box-sized sections (box_width x box_height) and calculate the number of skin-colored pixels in each box.
+    Boxes must not overlap!
+    Returns a list of boxes, each containing the count of skin-colored pixels.
+    Example: If the image has 25 boxes with 5 boxes per row, the list should be structured as
+      [[1,0,0,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]].
+      Here, the first box has 1 skin pixel, the second 0, the third 0, the fourth 1, and the fifth 1.'''
+    
+    h, w = image.shape[:2]
+    num_boxes_y = h // box_height
+    num_boxes_x = w // box_width
+    total_boxes = num_boxes_y * num_boxes_x
+    random_counts = np.random.randint(0, 55, size=(total_boxes,))
+    return random_counts.reshape(num_boxes_y, num_boxes_x).tolist()
+
+def count_skin_colored_pixels(image, skin_color) -> int:
+    '''Count the number of skin-colored pixels in the box.'''
+    pass
+
 if __name__ == '__main__':
 
     camera = cv.VideoCapture(1)
@@ -52,6 +58,7 @@ if __name__ == '__main__':
 
     skin_color = None
     target_width, target_height = 220, 340
+    box_width, box_height = 20, 20
 
     while True:
         # Read the image from the camera
@@ -68,7 +75,17 @@ if __name__ == '__main__':
             cv.imshow('Camera', image)
         else:
             resized_image = resize_image(image, target_width, target_height)
-
+            boxes = process_image_with_boxes(resized_image, box_width, box_height, skin_color)
+            print(f"Boxes matrix: {boxes}")
+            # Prikaz škatel na zmanjšani sliki
+            for y, vrstica in enumerate(boxes):
+                for x, st_pikslov in enumerate(vrstica):
+                    if st_pikslov > 50:  # Prag za "kožo"
+                        x1 = x * box_width
+                        y1 = y * box_height
+                        x2 = x1 + box_width
+                        y2 = y1 + box_height
+                        cv.rectangle(resized_image, (x1, y1), (x2, y2), (0, 255, 0), 1)
             cv.imshow('Camera', resized_image)
 
         key = cv.waitKey(1) & 0xFF
@@ -84,16 +101,11 @@ if __name__ == '__main__':
             skin_color = determine_skin_color(image, upper_left, down_right)
             print(f"Skin color {skin_color}")
         elif key == ord('q'):
-            camera.release()
-            cv.destroyAllWindows()
-            print('Camera closed.')
-            exit(0)
             break
 
     camera.release()
     cv.destroyAllWindows()
-
-    #Zajemaj slike iz kamere in jih obdeluj     
+    print('Camera closed.')
     
     #Označi območja (škatle), kjer se nahaja obraz (kako je prepuščeno vaši domišljiji)
         #Vprašanje 1: Kako iz števila pikslov iz vsake škatle določiti celotno območje obraza (Floodfill)?
