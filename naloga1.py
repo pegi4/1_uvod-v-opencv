@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import time
 
 def determine_skin_color(image, top_left, bottom_right) -> tuple:
     print("Selecting color...")
@@ -90,8 +91,12 @@ if __name__ == '__main__':
     skin_color = None
     target_width, target_height = 220, 340
     box_width, box_height = 20, 20
+    color_thickness = 2
 
     while True:
+
+        start_time = time.time()
+
         ret, captured_image = camera.read()
         if not ret:
             print('Error reading from camera.')
@@ -103,12 +108,18 @@ if __name__ == '__main__':
         if skin_color is None:
             cv.imshow('Camera', image)
         else:
-            resized_image = resize_image(image, target_width, target_height)
-            faces = process_image_with_boxes(resized_image, box_width, box_height, skin_color)
+            faces = process_image_with_boxes(image, box_width, box_height, skin_color)
             #print(f"Detected faces: {len(faces)}")
             for (x1, y1), (x2, y2) in faces:
-                cv.rectangle(resized_image, (x1, y1), (x2, y2), (0, 255, 0), 1)
-            cv.imshow('Camera', resized_image)
+                cv.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), color_thickness)
+
+            fps = 1.0 / (time.time() - start_time)
+            cv.putText(image, f"FPS: {int(fps)}", (10, 20), 
+                       cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), color_thickness)
+            
+            cv.putText(image, f"Detected faces: {len(faces)}", (10, 40),
+                       cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), color_thickness)
+            cv.imshow('Camera', image)
 
         key = cv.waitKey(1) & 0xFF
         if key == ord('c'):
